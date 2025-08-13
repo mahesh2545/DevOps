@@ -1,48 +1,14 @@
-#!/bin/bash
-# -------------------------------------------------
-# Jenkins Installation Script for Oracle Linux 9.4
-# -------------------------------------------------
-# This script will:
-# 1. Update system
-# 2. Install Java 17 (OpenJDK)
-# 3. Install Jenkins + Git
-# 4. Start & Enable Jenkins
-# 5. Optional: Remount /tmp if needed
-# -------------------------------------------------
-
-if [ "$EUID" -ne 0 ]; then
-    echo "❌ Please run as root (use sudo)"
-    exit 1
-fi
-
-echo "📥 Adding Jenkins repository..."
-wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-
-echo "☕ Installing Java 17 (OpenJDK)..."
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 dnf install java-17-openjdk java-17-openjdk-devel -y
-
-echo "📥 Installing Jenkins and Git..."
-dnf install jenkins git -y
-
-echo "⚙️ Enabling and starting Jenkins..."
-systemctl enable jenkins
-systemctl start jenkins
-
-echo "🔍 Checking Jenkins status..."
-systemctl status jenkins --no-pager
-
-# Optional /tmp remount (only if needed)
-echo "💡 If Jenkins fails due to /tmp issues, uncomment the next lines."
-mkdir -p /var/tmp_disk
-chmod 1777 /var/tmp_disk
-mount --bind /var/tmp_disk /tmp
-echo '/var/tmp_disk /tmp none bind 0 0' | tee -a /etc/fstab
-systemctl mask tmp.mount
-systemctl restart jenkins
-echo "---------------------------------------------------"
-echo "✅ Jenkins installation completed successfully!"
-echo "🌐 Access Jenkins at: http://<your_server_ip>:8080"
-echo "🔑 Initial Admin Password:"
-cat /var/lib/jenkins/secrets/initialAdminPassword
-echo "---------------------------------------------------"
+sudo yum install jenkins git -y
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+sudo mkdir -p /var/tmp_disk
+sudo chmod 1777 /var/tmp_disk
+sudo mount --bind /var/tmp_disk /tmp
+echo '/var/tmp_disk /tmp none bind 0 0' | sudo tee -a /etc/fstab
+sudo systemctl mask tmp.mount
+df -h /tmp
+sudo systemctl restart jenkins
